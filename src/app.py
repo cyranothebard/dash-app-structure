@@ -11,11 +11,14 @@ import dash_bootstrap_components as dbc
 from flask import Flask
 from flask_login import LoginManager
 import os
+import pandas as pd
+import numpy as np 
 
 # local imports
-from utils.settings import APP_HOST, APP_PORT, APP_DEBUG, DEV_TOOLS_PROPS_CHECK
+# from utils.settings import APP_HOST, APP_PORT, APP_DEBUG, DEV_TOOLS_PROPS_CHECK
 from components.login import User, login_location
 from components import navbar, footer
+import utils.GoSdk_MsgHandler
 
 server = Flask(__name__)
 app = dash.Dash(
@@ -54,7 +57,7 @@ def load_user(username):
 def serve_layout():
     '''Define the layout of the application'''
     return html.Div(
-        [
+        [   
             login_location,
             navbar,
             dbc.Container(
@@ -69,11 +72,16 @@ def serve_layout():
 app.layout = serve_layout   # set the layout to the serve_layout function
 server = app.server         # the server is needed to deploy the application
 
+# Run the app locally for development
 if __name__ == "__main__":
-    app.run_server(
-        host=APP_HOST,
-        port=APP_PORT,
-        debug=APP_DEBUG,
-        dev_tools_props_check=DEV_TOOLS_PROPS_CHECK
-    )
+    app.run(debug=True)
+
+# Run the app on server
+# if __name__ == "__main__":
+#     app.run_server(
+#         host=APP_HOST,
+#         port=APP_PORT,
+#         debug=APP_DEBUG,
+#         dev_tools_props_check=DEV_TOOLS_PROPS_CHECK
+#     )
 
