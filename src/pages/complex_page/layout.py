@@ -18,11 +18,11 @@ import scipy
 
 # local imports
 # from .comp1 import random_component
-from components import create_profile_image_card, NumberFactAIO
+from components import create_profile_image_card
 from utils import GoSdk_MsgHandler
 from utils.data_sensorarray import ReceiveData, groupby_and_export, map_id_to_name
 
-##LMI internal Python script
+# ##LMI internal Python script
 
 from asyncio.windows_events import NULL
 import os
@@ -108,309 +108,10 @@ def kObject_Destroy(object):
     if (object != kNULL):
         kApi.xkObject_DestroyImpl(object, kFALSE)
 
-def map_id_to_name(id_value):
-    """
-    Defines measurement names in a dictionary that can be mapped to raw data output by ID.
-
-    """
-    featurename_dict = {
-       125: 'Tongue Upper Radius',
-       121: 'Tongue Lower Radius',
-       116: 'Tongue Hem Height',
-       96: 'Groove Seat Distance, Outer',
-       90: 'Groove Seat Distance, Inner',
-       109: 'Groove Side Hem Height',
-       80: 'Groove Width, Inner',
-       77: 'Groove Width, Outer',
-       68: 'Groove Height',
-       66: 'Groove upper Claw Height',
-       63: 'Groove Upper Bump Height',
-       24: 'Clip length/Distance',
-       23: 'Clip length/Width',
-       106: 'Groove Radius, Upper Outer',
-       103: 'Groove Radius, Middle',
-       100: 'Groove Radius, Lower Inner',
-       18: 'Groove Radius, Lower Outer',
-       50: 'Tongue Width, Upper',
-       43: 'Tongue Width',
-       38: 'Tongue Lower Leg Height',
-       32: 'Tongue Middle Leg Height',
-       14: 'Tongue Leg Height',
-       
-    }
-    return featurename_dict.get(id_value, 'Unknown')
-
-def groupby_and_export(df, output_path=None, s3_bucket=None):
-    """
-    Groups a DataFrame by the specified column and calculates mean values.
-    Optionally exports the result to a CSV file or an AWS S3 bucket.
-
-    Args:
-        df (pd.DataFrame): Input DataFrame.
-        output_path (str, optional): Local path to save the CSV file (if provided).
-        s3_bucket (str, optional): AWS S3 bucket name (if provided).
-
-    Returns:
-        pd.DataFrame: Resulting DataFrame with mean values.
-    # """
-    # convert 'ID' and 'FeatureName' cols to str for aggregation
-    df['ID'] = df['ID'].apply(str)
-    df['FeatureName'] = df['FeatureName'].apply(str)
-    grouped_df = df.groupby(['ID', 'FeatureName']).agg(
-        {'Decision': 'mean', 'Value': 'mean', 'TimeStamp': 'mean'}).reset_index() 
-    # convert 'ID' back to int and remap feature names
-    grouped_df['ID'] = grouped_df['ID'].apply(int)
-    grouped_df['FeatureName'] = grouped_df['ID'].map(map_id_to_name)   
-
-    print('grouped_df:', grouped_df)
-    
-    # Export to CSV file (if output_path is provided)
-    if output_path:
-        grouped_df.to_csv(output_path, index=False)
-        print(f"Saved result to {output_path}")
-
-    # Upload to AWS S3 bucket (if s3_bucket is provided)
-    if s3_bucket:
-        s3_resource = boto3.resource("s3")
-        data = grouped_df #BytesIO()
-        grouped_df.to_csv(data, index=False)
-        s3_resource.Object(s3_bucket, "grouped_data.csv").put(Body=data.getvalue())
-        print(f"Uploaded result to S3 bucket: {s3_bucket}/grouped_data.csv")
-
-    return grouped_df
-
-def ReceiveData(dataset):
-    # create dataframe to organize data
-    measurement_data = pd.DataFrame(columns=['ID', 'Value', 'Decision', 'FeatureName', 'TimeStamp'])
-    measurement_data_batch = pd.DataFrame(columns=['ID', 'Value', 'Decision', 'FeatureName', 'TimeStamp'])
-    ## loop through all items in result message
-    for i in range(GoSdk.GoDataSet_Count(dataset)):
-        k_object_address = GoSdk.GoDataSet_At(dataset, i)
-        dataObj = GoDataMsg(k_object_address)
-
-        ## Retrieve stamp message
-        if GoSdk.GoDataMsg_Type(dataObj) == GO_DATA_MESSAGE_TYPE_STAMP:
-            stampMsg = dataObj
-            msgCount = GoSdk.GoStampMsg_Count(stampMsg)
-            
-            for k in range(msgCount):
-                stampDataPtr = GoSdk.GoStampMsg_At(stampMsg,k)
-                stampData = stampDataPtr.contents
-                print("frame index: ", stampData.frameIndex)
-                print("time stamp: ", stampData.timestamp)
-                print("encoder: ", stampData.encoder)
-                print("sensor ID: ", stampData.id)
-                print()
-        if GoSdk.GoDataMsg_Type(dataObj) == GO_DATA_MESSAGE_TYPE_MEASUREMENT:
-            measurementMsg = dataObj
-            msgCount = GoSdk.GoMeasurementMsg_Count(measurementMsg)
-            print("Measurement Message batch count: %d" % msgCount)
-
-            for k in range(GoSdk.GoMeasurementMsg_Count(measurementMsg)):
-                measurementDataPtr = (GoSdk.GoMeasurementMsg_At(measurementMsg, k))
-                measurementData = measurementDataPtr.contents #(measurementDataPtr, POINTER(GoMeasurementData)).contents
-                measurementID = (GoSdk.GoMeasurementMsg_Id(measurementMsg))
-                measurement_data_agg = [{'ID': measurementID, 'Value': measurementData.numericVal, 'Decision': measurementData.decision, 
-                                         'FeatureName': pd.Series(measurementID).map(map_id_to_name), 'TimeStamp': pd.to_datetime('now')}]
-                measurement_data = pd.concat([measurement_data, pd.DataFrame(measurement_data_agg)], ignore_index=True)
-            # print('measurement_data_batch:')
-            measurement_data_batch = pd.concat([measurement_data_batch, pd.DataFrame(measurement_data)], ignore_index=True)
-                # print(measurement_data)
-                # print()
-                # print("Measurement ID: ", measurementID)
-                # print("Measurement Value: ", measurementData.numericVal)
-                # print("Measurment Decision: " + str(measurementData.decision))
-                # print()
-            
-            # print(measurement_data)
-        elif GoSdk.GoDataMsg_Type(dataObj) == GO_DATA_MESSAGE_TYPE_UNIFORM_SURFACE:
-            surfaceMsg = dataObj
-            print("Surface Message")
-
-            #resolutions and offsets (cast to mm)
-            XResolution = float((GoSdk.GoUniformSurfaceMsg_XResolution(surfaceMsg)))/1000000.0
-            YResolution = float((GoSdk.GoUniformSurfaceMsg_YResolution(surfaceMsg)))/1000000.0
-            ZResolution = float((GoSdk.GoUniformSurfaceMsg_ZResolution(surfaceMsg)))/1000000.0
-            XOffset = float((GoSdk.GoUniformSurfaceMsg_XOffset(surfaceMsg)))/1000.0
-            YOffset = float((GoSdk.GoUniformSurfaceMsg_YOffset(surfaceMsg)))/1000.0
-            ZOffset = float((GoSdk.GoUniformSurfaceMsg_ZOffset(surfaceMsg)))/1000.0
-            width = GoSdk.GoUniformSurfaceMsg_Width(surfaceMsg)
-            length = GoSdk.GoUniformSurfaceMsg_Length(surfaceMsg)
-            size = width * length
-
-            print("Surface data width: " + str(width))
-            print("Surface data length: " + str(length))
-            print("Total num points: " + str(size)) 
-
-            #Generate Z points
-            start = time.time()
-            surfaceDataPtr = GoSdk.GoUniformSurfaceMsg_RowAt(surfaceMsg, 0)
-            Z = np.ctypeslib.as_array(surfaceDataPtr, shape=(size,))  
-            Z = Z.astype(np.double)
-            #remove -32768 and replace with nan
-            Z[Z==-32768] = np.nan    
-            #scale to real world units (for Z only)                  
-            Z = (Z * ZResolution) + ZOffset     
-            print("Z array generation time: ",time.time() - start)
-
-            #generate X points
-            start = time.time()
-            X = (np.asarray(range(width), dtype=np.double) * XResolution) + XOffset
-            X = np.tile(X, length)
-            print("X array generation time: ",time.time() - start)
-
-            #generate Y points
-            start = time.time()
-            Y = (np.arange(length, dtype=np.double)* YResolution) + YOffset
-            Y = np.repeat(Y, repeats=width)
-            print("Y array generation time: ",time.time() - start)
-
-            #Generate X, Y, Z array for saving
-            data_3DXYZ = np.stack((X,Y,Z), axis = 1)
-
-            # #write to file as np array (fast)
-            start = time.time()
-            unique_filename = str(uuid.uuid4())
-            np.save(unique_filename+"XYZ"+".npy",data_3DXYZ)
-            print("wrote to file "+unique_filename+ "XYZ" + ".npy")
-            print("Save npy file time: ",time.time() - start)
-            
-            # #write to CSV (slow)
-            start = time.time()
-            unique_filename = str(uuid.uuid4())
-            with open(unique_filename+"XYZ.csv",'w',newline='') as csvfile:
-               writer = csv.writer(csvfile,delimiter=',')
-               writer.writerow(["X","Y","Z"])
-               writer.writerows(data_3DXYZ)
-            print("wrote to file "+unique_filename + "XYZ.csv")
-            print("Save CSV file time: ",time.time() - start)
-
-            #Display the surface (it look square unless a perspective correction is done)
-            image = np.reshape(Z, (-1, width))
-            maxval = np.nanmax(image)
-            image = (image / maxval) * 255.0
-            image = image.astype(np.uint8) 
-            image = cv2.resize(image, dsize=(512, 512), interpolation=cv2.INTER_CUBIC)         
-            cv2.imshow("image", image)
-            cv2.waitKey(0)
-            print()
-
-        elif GoSdk.GoDataMsg_Type(dataObj) == GO_DATA_MESSAGE_TYPE_SURFACE_INTENSITY:
-            print("Intensity Message")
-            surfaceIntensityMsg = dataObj
-
-            #resolutions and offsets (cast to mm)
-            XResolution = float((GoSdk.GoSurfaceIntensityMsg_XResolution(surfaceIntensityMsg)))/1000000.0
-            YResolution = float((GoSdk.GoSurfaceIntensityMsg_YResolution(surfaceIntensityMsg)))/1000000.0
-            XOffset = float((GoSdk.GoSurfaceIntensityMsg_XOffset(surfaceIntensityMsg)))/1000.0
-            YOffset = float((GoSdk.GoSurfaceIntensityMsg_YOffset(surfaceIntensityMsg)))/1000.0
-            width = GoSdk.GoSurfaceIntensityMsg_Width(surfaceIntensityMsg)
-            length = GoSdk.GoSurfaceIntensityMsg_Length(surfaceIntensityMsg)
-            size = width * length
-            
-            print("Surface data width: " + str(width))
-            print("Surface data length: " + str(length))
-            print("Total num points: " + str(size)) 
-
-            #Generate I points
-            surfaceIntensityDataPtr = GoSdk.GoSurfaceIntensityMsg_RowAt(surfaceIntensityMsg, 0)
-            I = np.array((surfaceIntensityDataPtr[0:width*length]), dtype=np.uint8)
-            
-            #generate X points
-            start = time.time()
-            X = (np.asarray(range(width), dtype=np.double) * XResolution) + XOffset
-            X = np.tile(X, length)
-            print("X array generation time: ",time.time() - start)
-
-            #generate Y points
-            start = time.time()
-            Y = (np.arange(length, dtype=np.double)* YResolution) + YOffset
-            Y = np.repeat(Y, repeats=width)
-            print("Y array generation time: ",time.time() - start)
-
-            #Generate X, Y, Z array for saving
-            data_3DXYI = np.stack((X,Y,I), axis = 1)                
-
-            # write to file as np array (fast)
-            start = time.time()
-            unique_filename = str(uuid.uuid4())
-            np.save(unique_filename+"XYI"+".npy",data_3DXYI)
-            print("wrote to file "+unique_filename+ "XYI" + ".npy")
-            print("Save npy file time: ",time.time() - start)
-            
-            # write to CSV (slow)
-            start = time.time()
-            unique_filename = str(uuid.uuid4())
-            with open(unique_filename+"XYI.csv",'w',newline='') as csvfile:
-               writer = csv.writer(csvfile,delimiter=',')
-               writer.writerow(["X","Y","I"])
-               writer.writerows(data_3DXYZ)
-            print("wrote to file "+unique_filename + "XYI.csv")
-            print("Save CSV file time: ",time.time() - start)
-
-            # Display the surface (it look square unless a perspective correction is done)
-            image = np.reshape(I, (-1, width))
-            maxval = np.nanmax(image)
-            image = (image / maxval) * 255.0
-            image = image.astype(np.uint8) 
-            image = cv2.resize(image, dsize=(512, 512), interpolation=cv2.INTER_CUBIC)         
-            cv2.imshow("image", image)
-            cv2.waitKey(0)
-            print()
-
-        elif GoSdk.GoDataMsg_Type(dataObj) == GO_DATA_MESSAGE_TYPE_UNIFORM_PROFILE:
-            print("Profile Message")
-            profileMsg = dataObj
-
-            for k in range(GoSdk.GoResampledProfileMsg_Count(profileMsg)):
-                #resolutions and offsets (cast to mm)
-                XResolution = float((GoSdk.GoResampledProfileMsg_XResolution(profileMsg)))/1000000.0
-                ZResolution = float((GoSdk.GoResampledProfileMsg_ZResolution(profileMsg)))/1000000.0
-                XOffset = float((GoSdk.GoResampledProfileMsg_XOffset(profileMsg)))/1000.0
-                ZOffset = float((GoSdk.GoResampledProfileMsg_ZOffset(profileMsg)))/1000.0
-                width = GoSdk.GoProfileMsg_Width(profileMsg)
-                size = width
-
-                #Generate Z points
-                start = time.time()
-                profileDataPtr = GoSdk.GoResampledProfileMsg_At(profileMsg, k)
-                Z = np.ctypeslib.as_array(profileDataPtr, shape=(size,))
-                Z = Z.astype(np.double)
-                Z[Z==-32768] = np.nan                 
-                Z = (Z * ZResolution) + ZOffset     
-                print("Z array generation time: ",time.time() - start)
-
-                #generate X points
-                start = time.time()
-                X = (np.asarray(range(width), dtype=np.double) * XResolution) + XOffset
-                print("X array generation time: ",time.time() - start)
-
-                #Generate X, Y, Z array for saving
-                data_3DXZ = np.stack((X,Z), axis = 1)   
-
-                #write to file as np array (fast)
-                unique_filename = str(uuid.uuid4())
-                np.save(unique_filename+"XZ"+".npy",data_3DXZ)
-                
-                #write to CSV (slow)
-                unique_filename = str(uuid.uuid4())
-                with open(unique_filename+"XZ.csv",'w',newline='') as csvfile:
-                   writer = csv.writer(csvfile,delimiter=',')
-                   writer.writerow(["X","Z"])
-                   writer.writerows(data_3DXZ)
-                print("wrote to file "+unique_filename)
-                
-                print()
-    print('Measurement Data, batch:', measurement_data_batch)
-    grouped_df = groupby_and_export(measurement_data_batch)
-    print('grouped_df:', grouped_df)
-    kObject_Destroy(dataset)
-    return grouped_df, # measurement_data_batch
-
-
+### generate dummy data for experimentation
 df = pd.read_csv('https://gist.githubusercontent.com/chriddyp/c78bf172206ce24f77d6363a2d754b59/raw/c353e8ef842413cae56ae3920b8fd78468aa4cb2/usa-agricultural-exports-2011.csv')
 cwd = os.getcwd()
-order_data_path = os.path.join(cwd, 'src', 'assets', 'data', 'RPS Example Data 1.csv')
+order_data_path = os.path.join(cwd, 'dash-app-structure', 'src', 'assets', 'data', 'RPS Example Data 1.csv')
 order_data = pd.read_csv(order_data_path)
 order_data = order_data[order_data['workorder']==25512169]
 df_orderdata = dash_table.DataTable(
@@ -431,22 +132,22 @@ df_sensor_sample = np.trunc(1000*df_sensor_sample) / 1000
 
 # print(df_sensor_sample)
 def generate_table(dataframe, max_rows=10):
-    # return html.Table([
-    #     html.Thead(
-    #         html.Tr([html.Th(col) for col in dataframe.columns])
-    #     ),
-    #     html.Tbody([
-    #         html.Tr([
-    #             html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
-    #         ]) for i in range(min(len(dataframe), max_rows))
-    #     ])
-    # ])
-    dataframe = ReceiveData()
-    return dash_table.DataTable(
-        data=dataframe.to_dict('records'),
-        columns=[{'name': col, 'id': col} for col in dataframe.columns],
-        style_data_conditional = sensor_data_conditional
-    )
+    return html.Table([
+        html.Thead(
+            html.Tr([html.Th(col) for col in dataframe.columns])
+        ),
+        html.Tbody([
+            html.Tr([
+                html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
+            ]) for i in range(min(len(dataframe), max_rows))
+        ])
+    ])
+    # dataframe = ReceiveData()
+    # return dash_table.DataTable(
+    #     data=dataframe.to_dict('records'),
+    #     columns=[{'name': col, 'id': col} for col in dataframe.columns],
+    #     style_data_conditional = sensor_data_conditional
+    # )
     
 sensor_data_conditional = [
     {
@@ -576,9 +277,6 @@ layout = html.Div(
         # html.H3('Random component'),
         # random_component,
         html.H3('Garage Door Profiles'),
-        # DEBUGGING attempt to fix image loading issue with alternate technique
-        # html.Div(html.Img(src=app.get_asset_url('side_profiles/70E100_left.png'), style={'height':'50%', 'width':'30%', 'padding':'10px','textAlign':'left', 'align':'left', 'class':'column'})),
-        # html.Div(html.Img(src=app.get_asset_url('side_profiles/70E100_right.png'), style={'height':'50%', 'width':'30%', 'padding':'10px', 'textAlign':'right', 'align':'right', 'class':'column'})),
         dbc.Row(
             [
                 create_profile_image_card('70E100', 'left'), # DEBUGGING - function results in broken images
@@ -586,8 +284,8 @@ layout = html.Div(
             ]
         ),
         html.H3('Measurement Data'),
-        generate_table(ReceiveData),
-        # generate_table(df_sensor_sample),
+        # generate_table(ReceiveData),
+        generate_table(df_sensor_sample),
         html.H3('Order Data'),
         df_orderdata #.loc[df_orderdata['workorder']==25512169]
         ], 
