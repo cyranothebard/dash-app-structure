@@ -1,25 +1,24 @@
-# notes
-'''
-This file is for housing the main dash application.
-This is where we define the various css items to fetch as well as the layout of our application.
-'''
+# Standard library imports
+import os
 
-# package imports
+# Third-party library imports
 import dash
-from dash import html
 import dash_bootstrap_components as dbc
+import numpy as np
+import pandas as pd
 from flask import Flask
 from flask_login import LoginManager
-import os
-import pandas as pd
-import numpy as np 
 
-# local imports
-# from utils.settings import APP_HOST, APP_PORT, APP_DEBUG, DEV_TOOLS_PROPS_CHECK
+# Local imports
 from components.login import User, login_location
 from components import navbar, footer
-import utils.GoSdk_MsgHandler
+from utils.settings import (APP_DEBUG, APP_HOST, APP_PORT, DEV_TOOLS_PROPS_CHECK)
 
+# Specific imports from dash
+from dash import html
+
+# Specific imports from components
+#from components.login import User, login_location
 server = Flask(__name__)
 app = dash.Dash(
     __name__,

@@ -1,0 +1,553 @@
+ID,Value,Decision,FeatureName,TimeStamp
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+77,4.455,0,"0    Groove Width, Outer
+dtype: object",2024-04-03 00:02:43.603254
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+77,4.455,0,"0    Groove Width, Outer
+dtype: object",2024-04-03 00:02:43.603254
+80,12.37,0,"0    Groove Width, Inner
+dtype: object",2024-04-03 00:02:43.606254
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+77,4.455,0,"0    Groove Width, Outer
+dtype: object",2024-04-03 00:02:43.603254
+80,12.37,0,"0    Groove Width, Inner
+dtype: object",2024-04-03 00:02:43.606254
+90,35.307,0,"0    Groove Seat Distance, Inner
+dtype: object",2024-04-03 00:02:43.609253
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+77,4.455,0,"0    Groove Width, Outer
+dtype: object",2024-04-03 00:02:43.603254
+80,12.37,0,"0    Groove Width, Inner
+dtype: object",2024-04-03 00:02:43.606254
+90,35.307,0,"0    Groove Seat Distance, Inner
+dtype: object",2024-04-03 00:02:43.609253
+96,33.005,0,"0    Groove Seat Distance, Outer
+dtype: object",2024-04-03 00:02:43.612257
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+77,4.455,0,"0    Groove Width, Outer
+dtype: object",2024-04-03 00:02:43.603254
+80,12.37,0,"0    Groove Width, Inner
+dtype: object",2024-04-03 00:02:43.606254
+90,35.307,0,"0    Groove Seat Distance, Inner
+dtype: object",2024-04-03 00:02:43.609253
+96,33.005,0,"0    Groove Seat Distance, Outer
+dtype: object",2024-04-03 00:02:43.612257
+100,2.008,0,"0    Groove Radius, Lower Inner
+dtype: object",2024-04-03 00:02:43.615807
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+77,4.455,0,"0    Groove Width, Outer
+dtype: object",2024-04-03 00:02:43.603254
+80,12.37,0,"0    Groove Width, Inner
+dtype: object",2024-04-03 00:02:43.606254
+90,35.307,0,"0    Groove Seat Distance, Inner
+dtype: object",2024-04-03 00:02:43.609253
+96,33.005,0,"0    Groove Seat Distance, Outer
+dtype: object",2024-04-03 00:02:43.612257
+100,2.008,0,"0    Groove Radius, Lower Inner
+dtype: object",2024-04-03 00:02:43.615807
+103,1.866,0,"0    Groove Radius, Middle
+dtype: object",2024-04-03 00:02:43.621803
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+77,4.455,0,"0    Groove Width, Outer
+dtype: object",2024-04-03 00:02:43.603254
+80,12.37,0,"0    Groove Width, Inner
+dtype: object",2024-04-03 00:02:43.606254
+90,35.307,0,"0    Groove Seat Distance, Inner
+dtype: object",2024-04-03 00:02:43.609253
+96,33.005,0,"0    Groove Seat Distance, Outer
+dtype: object",2024-04-03 00:02:43.612257
+100,2.008,0,"0    Groove Radius, Lower Inner
+dtype: object",2024-04-03 00:02:43.615807
+103,1.866,0,"0    Groove Radius, Middle
+dtype: object",2024-04-03 00:02:43.621803
+106,1.259,0,"0    Groove Radius, Upper Outer
+dtype: object",2024-04-03 00:02:43.625836
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+77,4.455,0,"0    Groove Width, Outer
+dtype: object",2024-04-03 00:02:43.603254
+80,12.37,0,"0    Groove Width, Inner
+dtype: object",2024-04-03 00:02:43.606254
+90,35.307,0,"0    Groove Seat Distance, Inner
+dtype: object",2024-04-03 00:02:43.609253
+96,33.005,0,"0    Groove Seat Distance, Outer
+dtype: object",2024-04-03 00:02:43.612257
+100,2.008,0,"0    Groove Radius, Lower Inner
+dtype: object",2024-04-03 00:02:43.615807
+103,1.866,0,"0    Groove Radius, Middle
+dtype: object",2024-04-03 00:02:43.621803
+106,1.259,0,"0    Groove Radius, Upper Outer
+dtype: object",2024-04-03 00:02:43.625836
+109,5.4,1,"0    Groove Side Hem Height
+dtype: object",2024-04-03 00:02:43.628837
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+77,4.455,0,"0    Groove Width, Outer
+dtype: object",2024-04-03 00:02:43.603254
+80,12.37,0,"0    Groove Width, Inner
+dtype: object",2024-04-03 00:02:43.606254
+90,35.307,0,"0    Groove Seat Distance, Inner
+dtype: object",2024-04-03 00:02:43.609253
+96,33.005,0,"0    Groove Seat Distance, Outer
+dtype: object",2024-04-03 00:02:43.612257
+100,2.008,0,"0    Groove Radius, Lower Inner
+dtype: object",2024-04-03 00:02:43.615807
+103,1.866,0,"0    Groove Radius, Middle
+dtype: object",2024-04-03 00:02:43.621803
+106,1.259,0,"0    Groove Radius, Upper Outer
+dtype: object",2024-04-03 00:02:43.625836
+109,5.4,1,"0    Groove Side Hem Height
+dtype: object",2024-04-03 00:02:43.628837
+116,4.889,1,"0    Tongue Hem Height
+dtype: object",2024-04-03 00:02:43.631887
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+77,4.455,0,"0    Groove Width, Outer
+dtype: object",2024-04-03 00:02:43.603254
+80,12.37,0,"0    Groove Width, Inner
+dtype: object",2024-04-03 00:02:43.606254
+90,35.307,0,"0    Groove Seat Distance, Inner
+dtype: object",2024-04-03 00:02:43.609253
+96,33.005,0,"0    Groove Seat Distance, Outer
+dtype: object",2024-04-03 00:02:43.612257
+100,2.008,0,"0    Groove Radius, Lower Inner
+dtype: object",2024-04-03 00:02:43.615807
+103,1.866,0,"0    Groove Radius, Middle
+dtype: object",2024-04-03 00:02:43.621803
+106,1.259,0,"0    Groove Radius, Upper Outer
+dtype: object",2024-04-03 00:02:43.625836
+109,5.4,1,"0    Groove Side Hem Height
+dtype: object",2024-04-03 00:02:43.628837
+116,4.889,1,"0    Tongue Hem Height
+dtype: object",2024-04-03 00:02:43.631887
+120,-18.423,0,"0    Unknown
+dtype: object",2024-04-03 00:02:43.634891
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+77,4.455,0,"0    Groove Width, Outer
+dtype: object",2024-04-03 00:02:43.603254
+80,12.37,0,"0    Groove Width, Inner
+dtype: object",2024-04-03 00:02:43.606254
+90,35.307,0,"0    Groove Seat Distance, Inner
+dtype: object",2024-04-03 00:02:43.609253
+96,33.005,0,"0    Groove Seat Distance, Outer
+dtype: object",2024-04-03 00:02:43.612257
+100,2.008,0,"0    Groove Radius, Lower Inner
+dtype: object",2024-04-03 00:02:43.615807
+103,1.866,0,"0    Groove Radius, Middle
+dtype: object",2024-04-03 00:02:43.621803
+106,1.259,0,"0    Groove Radius, Upper Outer
+dtype: object",2024-04-03 00:02:43.625836
+109,5.4,1,"0    Groove Side Hem Height
+dtype: object",2024-04-03 00:02:43.628837
+116,4.889,1,"0    Tongue Hem Height
+dtype: object",2024-04-03 00:02:43.631887
+120,-18.423,0,"0    Unknown
+dtype: object",2024-04-03 00:02:43.634891
+121,12.297,0,"0    Tongue Lower Radius
+dtype: object",2024-04-03 00:02:43.637891
+14,48.145,1,"0    Tongue Leg Height
+dtype: object",2024-04-03 00:02:43.555589
+18,2.087,0,"0    Groove Radius, Lower Outer
+dtype: object",2024-04-03 00:02:43.562586
+23,-156.049,0,"0    Clip length/Width
+dtype: object",2024-04-03 00:02:43.567588
+24,5.4,0,"0    Clip length/Distance
+dtype: object",2024-04-03 00:02:43.570595
+32,39.519,0,"0    Tongue Middle Leg Height
+dtype: object",2024-04-03 00:02:43.574627
+38,4.299,0,"0    Tongue Lower Leg Height
+dtype: object",2024-04-03 00:02:43.577628
+43,11.053,0,"0    Tongue Width
+dtype: object",2024-04-03 00:02:43.581628
+50,6.058,0,"0    Tongue Width, Upper
+dtype: object",2024-04-03 00:02:43.585216
+63,0.744,0,"0    Groove Upper Bump Height
+dtype: object",2024-04-03 00:02:43.591188
+66,7.161,1,"0    Groove upper Claw Height
+dtype: object",2024-04-03 00:02:43.596211
+68,46.23,1,"0    Groove Height
+dtype: object",2024-04-03 00:02:43.600257
+77,4.455,0,"0    Groove Width, Outer
+dtype: object",2024-04-03 00:02:43.603254
+80,12.37,0,"0    Groove Width, Inner
+dtype: object",2024-04-03 00:02:43.606254
+90,35.307,0,"0    Groove Seat Distance, Inner
+dtype: object",2024-04-03 00:02:43.609253
+96,33.005,0,"0    Groove Seat Distance, Outer
+dtype: object",2024-04-03 00:02:43.612257
+100,2.008,0,"0    Groove Radius, Lower Inner
+dtype: object",2024-04-03 00:02:43.615807
+103,1.866,0,"0    Groove Radius, Middle
+dtype: object",2024-04-03 00:02:43.621803
+106,1.259,0,"0    Groove Radius, Upper Outer
+dtype: object",2024-04-03 00:02:43.625836
+109,5.4,1,"0    Groove Side Hem Height
+dtype: object",2024-04-03 00:02:43.628837
+116,4.889,1,"0    Tongue Hem Height
+dtype: object",2024-04-03 00:02:43.631887
+120,-18.423,0,"0    Unknown
+dtype: object",2024-04-03 00:02:43.634891
+121,12.297,0,"0    Tongue Lower Radius
+dtype: object",2024-04-03 00:02:43.637891
+125,4.722,0,"0    Tongue Upper Radius
+dtype: object",2024-04-03 00:02:43.640889
