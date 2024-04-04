@@ -13,7 +13,7 @@ image_cdn = 'https://images.dog.ceo/breeds'
 
 # logo information
 cwd = os.getcwd()
-logo_path = os.path.join(cwd,'src', 'assets', 'logos', 'amarr_logo_main.jpg')
+logo_path = os.path.join(cwd,'dash-app-structure', 'src', 'assets', 'logos', 'amarr_logo_main.jpg')
 logo_tunel = base64.b64encode(open(logo_path, 'rb').read())
 logo_encoded = f'data:image/png;base64,{logo_tunel.decode()}'
 
@@ -22,10 +22,10 @@ def get_side_profile(productid, side):
     This method generates src location of garage door profile to be used
     as visualization aid on main operator interface.
     '''
-    side_profile_path_left = os.path.join(cwd, 'src', 'assets', 'side_profiles', '70E100_left.png')
+    side_profile_path_left = os.path.join(cwd, 'dash-app-structure', 'src', 'assets', 'side_profiles', '70E100_left.png')
     side_profile_tunel_left = base64.b64encode(open(side_profile_path_left, 'rb').read())
     side_profile_encoded_left = 'data:image/png;base64,{}'.format(side_profile_tunel_left.decode()) 
-    side_profile_path_right = os.path.join(cwd, 'src', 'assets', 'side_profiles', '70E100_right.png')
+    side_profile_path_right = os.path.join(cwd, 'dash-app-structure', 'src', 'assets', 'side_profiles', '70E100_right.png')
     side_profile_tunel_right = base64.b64encode(open(side_profile_path_right, 'rb').read())
     side_profile_encoded_right = 'data:image/png;base64,{}'.format(side_profile_tunel_right.decode()) 
     if productid and side:

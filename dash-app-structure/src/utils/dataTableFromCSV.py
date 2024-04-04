@@ -1,36 +1,13 @@
-# notes
-'''
-This directory is meant to be for a specific page.
-We will define the page and import any page specific components that we define in this directory.
-This file should serve the layouts and callbacks.
-The callbacks could be in their own file, but you'll need to make sure to import the file so they load.
-'''
 
-
-# package imports
 import dash
-from dash import html, dash_table
-import dash_bootstrap_components as dbc
-from flask import Flask
-from utils.data_sensorarray import getVersionStr
-from components import create_profile_image_card
-from utils.dataFrameFromCSV import read_csv_files_and_move_to_archive
+from dash import html, dcc
+import dash_table
+import pandas as pd
+import os
+import shutil
 
-def generate_table(dataframe):
-    """
-    Generate a Dash DataTable from a DataFrame.
 
-    Args:
-        dataframe (pd.DataFrame): DataFrame to be displayed.
-
-    Returns:
-        dash_table.DataTable: Dash DataTable component.
-    """
-    return dash_table.DataTable(
-        data=dataframe,
-        columns=[{'name': col, 'id': col} for col in dataframe.columns],
-        style_data_conditional=sensor_data_conditional
-    )
+columns = [{'name': col, 'id': col} for col in ['ID', 'Value', 'Decision', 'FeatureName', 'TimeStamp']]
 
 sensor_data_conditional = [
     {
@@ -121,53 +98,25 @@ sensor_data_conditional = [
         'backgroundColor': 'red',
         'color': 'white',
     },
-    #  {
-    #     'if': {
-    #         'filter_query': '{'Work Order'} == 10264754',
-    #         'column_id': 'Work Order'
-    #            },
-    #     'backgroundColor': 'red',
-    #     'color': 'white',
-    # },
 ]
 
-dash.register_page(
-    __name__,
-    path='/complex',
-    title='Process Monitoring'
-)
-server = Flask(__name__)
-app = dash.Dash(
-    __name__,
-    server=server,
-    # use_pages=True,    # turn on Dash pages
-    external_stylesheets=[
-        dbc.themes.BOOTSTRAP,
-        dbc.icons.FONT_AWESOME
-    ],  # fetch the proper css items we want
-    meta_tags=[
-        {   # check if device is a mobile device. This is a must if you do any mobile styling
-            'name': 'viewport',
-            'content': 'width=device-width, initial-scale=1'
-        }
-    ],
-    suppress_callback_exceptions=True,
-    title='Dash app structure'
-)
-getVersionStr()
-input_dir_path = r'F:\Gitea\dashboard\src\assets\data'
-archived_dir_path = r'F:\Gitea\dashboard\src\assets\data\archive'
-layout = html.Div([
-        # html.H3('Random component'),
-        # random_component,
-        html.H3('Garage Door Profiles'),
-        dbc.Row(
-            [
-                create_profile_image_card('70E100', 'left'), # DEBUGGING - function results in broken images
-                create_profile_image_card('70E100', 'right')
-            ]
-        ),
-        html.H3('Measurement Data'),
-        generate_table(read_csv_files_and_move_to_archive(input_dir_path, archived_dir_path)),
-        html.H3('Order Data'),
-    ])
+# Function to read CSV files from a directory, append data to the DataTable, and move files to an archive directory
+def process_csv_files(input_dir, archive_dir, data_table):
+
+   # Ensure that the archive directory exists
+    os.makedirs(archive_dir, exist_ok=True)
+    
+    # Iterate through each file in the input directory
+    for file_name in os.listdir(input_dir):
+        if file_name.endswith('.csv'):
+            file_path = os.path.join(input_dir, file_name)
+            
+            # Read CSV data into a DataFrame
+            dataframe = pd.read_csv(file_path)
+            
+            # Append data to the DataTable
+            data_table.data = data_table.data + dataframe.to_dict('records')
+            
+            # Move the CSV file to the archive directory
+            archived_file_path = os.path.join(archive_dir, file_name)
+            shutil.move(file_path, archived_file_path)
