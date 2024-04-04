@@ -11,7 +11,7 @@ To create an environment, install requirements, and run the app, use the followi
 python -m venv .venv                            # create virtual environment
 .venv\Scripts\activate                          # activate virtual enviorment
 .venv\Scripts\pip install -r requirements.txt   # install requirements
-.venv\Scripts\python .\src\app.py                 # run the application
+.venv\Scripts\python .\dash-app-structure\src\app.py                 # run the application
 ```
 
 ## Structure
@@ -25,9 +25,9 @@ Additionally, I've created this repository to demonstrate the structure and serv
 Each file in the repository includes more information about the purpose of the file.
 
 ```bash
-dash-app-structure
 |-- .venv
 |   |-- *
+dash-app-structure
 |-- requirements.txt
 |-- .env
 |-- .gitignore
