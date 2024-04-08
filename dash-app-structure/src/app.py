@@ -1,8 +1,10 @@
+import logging
 import os
 import threading
 
 import dash
 import dash_bootstrap_components as dbc
+from dash import html
 from flask import Flask
 from flask_login import LoginManager
 
@@ -10,8 +12,9 @@ from components.login import User, login_location
 from components import navbar, footer
 from utils.settings import APP_DEBUG, DEV_TOOLS_PROPS_CHECK
 from utils.getdataFromLMI_sensorarray import run_measurement_data_collection
+from utils.configureLogging import configure_logging
 
-from dash import html
+
 
 # Flask server configuration
 server = Flask(__name__)
@@ -51,12 +54,18 @@ app.layout = lambda: html.Div(
     ]
 )
 
+# Call the function to configure logging
+configure_logging()
+
 def main_thread():
     """Start the Flask app."""
-    server.run(debug=APP_DEBUG, port=8050)
+    configure_logging()  # Configure logging
+    logging.info("Starting the Flask app...")
+    server.run(host=os.getenv('HOST'), port=os.getenv('PORT'), debug=os.getenv('APP_DEBUG'))
 
 def data_collection_thread():
     """Start data collection in a separate thread."""
+    logging.info("Starting data collection...")
     thread = threading.Thread(target=run_measurement_data_collection)
     thread.start()
 

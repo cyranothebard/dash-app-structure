@@ -1,0 +1,9 @@
+{
+    "gosdkInstallPath": "C:/GO_SDK/",
+    "path_to_GoSdkdll" : "C:/GO_SDK/bin/win64/GoSdk.dll",
+    "path_to_kApidll" : "C:/GO_SDK/bin/win64/kApi.dll",
+    "data_directory_NP": "C:/Repo/Amarr_garagedoordimensioning/dash-app-structure/data/measurementDataNp",
+    "data_directory_archiveNP": "C:/Repo/Amarr_garagedoordimensioning/dash-app-structure/data/archiveNP",    
+    "data_directory_CSV": "C:/Repo/Amarr_garagedoordimensioning/dash-app-structure/data/measurementDataCSV",
+    "data_directory_archiveCSV": "C:/Repo/Amarr_garagedoordimensioning/dash-app-structure/data/archiveCSV"
+}

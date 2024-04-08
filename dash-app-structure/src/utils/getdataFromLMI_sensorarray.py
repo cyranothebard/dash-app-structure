@@ -1,11 +1,13 @@
-#Refactor this so main can be called from dash layout.py to run main function and continue to connect and read data from Lmi device
+
 import os
+import threading
 import pandas as pd
+import msvcrt
 import uuid
 import ctypes
+import logging
 import csv
 import cv2
-import time
 import numpy as np
 import boto3
 from ctypes import Structure, POINTER, byref, c_byte, c_char, c_int16, c_short, c_uint32, c_uint64, c_uint8, c_int32, c_int64, c_void_p, c_bool, c_double, c_ulonglong
@@ -13,13 +15,18 @@ from array import array
 from PIL import Image, ImageDraw
 
 from utils.GoSdk_MsgHandler import MsgManager
+from utils.loadConfig import load_config
+cwd = os.getcwd()
+config_file_path = os.path.join(cwd, 'dash-app-structure', 'config.json')
+config = load_config(config_file_path)
 
 ### Load Api
-gosdkInstallPath = os.environ.get('GO_SDK_4')
-path_to_kApidll = gosdkInstallPath+r"\GO_SDK\bin\win64\kApi.dll"
-#path_to_kApidll = r'F:\GO_SDK\bin\win64\kApi.dll' 
+#gosdkInstallPath = config.get('gosdkInstallPath')
+#path_to_GoSdkdll = gosdkInstallPath+r'\GO_SDK\bin\win64\GoSdk.dll'
+#path_to_kApidll = gosdkInstallPath+r'\GO_SDK\bin\win64\kApi.dll'
+path_to_kApidll = config.get('path_to_kApidll')
 kApi = ctypes.windll.LoadLibrary(path_to_kApidll)
-path_to_GoSdkdll = r'F:\GO_SDK\bin\win64\GoSdk.dll'
+path_to_GoSdkdll = config.get('path_to_GoSdkdll')
 GoSdk = ctypes.windll.LoadLibrary(path_to_GoSdkdll)
 
 ### Constant Declaration and Instantiation
@@ -55,37 +62,54 @@ class GoMeasurementData(Structure):
     _fields_ = [("numericVal", c_double), ("decision", c_uint8), ("decisionCode", c_uint8)]
     dataset = GoDataSet(kNULL)  # Define dataset as a class-level variable
 
-#@staticmethod
+def log_info(message):
+    logging.info(message)
+
+def log_error(message):
+    logging.error(message)
+
 def getVersionStr():
     version = ctypes.create_string_buffer(32)
     myVersion = GoSdk.GoSdk_Version()
     kApi.kVersion_Format(myVersion, version, 32)
     return str(ctypes.string_at(version))
 
-#@staticmethod
 def kObject_Destroy(object):
-    if (object != kNULL):
+    if object != kNULL:
         kApi.xkObject_DestroyImpl(object, kFALSE)
 
-#@staticmethod
-def export_csv(data):
+def export_csv(data, config):
     """
     Export DataFrame to a CSV file.
 
     Args:
         data (pd.DataFrame): DataFrame to be exported.
+        config (dict): Configuration containing the 'data_directory_CSV' setting.
 
     Returns:
         str: Filename of the exported CSV file.
     """
-    utils_folder = os.path.dirname(__file__)# Get the path of the utils folder
-    src_folder = os.path.dirname(utils_folder) # Get the path of the src folder
-    measurmentData_folder = os.path.join(src_folder, '..', 'data', 'measurmentDataCSV')
-    unique_filename = os.path.join(measurmentData_folder, str(uuid.uuid4()) + ".csv")
-    data.to_csv(unique_filename, index=False)
-    return unique_filename
+    data_directory_CSV = config.get('data_directory_CSV')
+    # Check if the directory exists for CSV data and create if not
+    if not os.path.exists(data_directory_CSV):
+        os.makedirs(data_directory_CSV)
 
-#@staticmethod
+    unique_filename = os.path.join(data_directory_CSV, str(uuid.uuid4()) + ".csv")
+    
+    try:
+        # Attempt to acquire an exclusive lock on the file
+        file = open(unique_filename, 'w')
+        data.to_csv(file, index=False)
+        file.close()
+        return unique_filename
+    except IOError as e:
+        # Failed to acquire lock, file is being accessed by another process
+        logging.warning(f"Failed to export CSV. File '{unique_filename}' is being accessed by another process.")
+    except Exception as e:
+        logging.error(f"Error exporting CSV: {str(e)}")
+    
+    return None
+
 def idToFeatureName(featureId):
     featurename = {
        125: 'Tongue Upper Radius',
@@ -113,27 +137,31 @@ def idToFeatureName(featureId):
     }
     return featurename.get(featureId, 'Unknown')
 
-#@staticmethod
 def receive_data(dataset):
-    """
-    Process received data from the sensor dataset.
-    
-    Args:
-        dataset: Dataset received from the sensor.
-
-    Returns:
-        str: Message indicating successful data reception.
-    """
     if not dataset:
-        print("Invalid dataset. Exiting function.")
+        log_error("Invalid dataset. Exiting function.")
         return None
-
-    measurement_data = pd.DataFrame(columns=['ID', 'Value', 'Decision', 'FeatureName', 'TimeStamp'])
-    measurement_data_batch = pd.DataFrame(columns=['ID', 'Value', 'Decision', 'FeatureName', 'TimeStamp'])
-
+    
+    sensor_data = None
+    measurement_data_list = []
+    
     for i in range(GoSdk.GoDataSet_Count(dataset)):
         k_object_address = GoSdk.GoDataSet_At(dataset, i)
         dataObj = GoDataMsg(k_object_address)
+        
+        if GoSdk.GoDataMsg_Type(dataObj) == GO_DATA_MESSAGE_TYPE_STAMP:
+            stampMsg = dataObj
+            msgCount = GoSdk.GoStampMsg_Count(stampMsg)
+            
+            for k in range(msgCount):
+                stampDataPtr = GoSdk.GoStampMsg_At(stampMsg, k)
+                stampData = stampDataPtr.contents
+
+                sensor_data = {
+                    'sensorID': stampData.id,
+                    'frameIndex': stampData.frameIndex,
+                    'timeStamp': stampData.timestamp
+                }
 
         if GoSdk.GoDataMsg_Type(dataObj) == GO_DATA_MESSAGE_TYPE_MEASUREMENT:
             measurementMsg = dataObj
@@ -144,24 +172,44 @@ def receive_data(dataset):
                 measurementData = measurementDataPtr.contents
                 measurementID = GoSdk.GoMeasurementMsg_Id(measurementMsg)
 
-                measurement_data_dict = [{
-                    'ID': measurementID,
+                measurement_data = {
+                    'sensorID': sensor_data['sensorID'],  # Relationship with sensor data
+                    'frameIndex': sensor_data['frameIndex'],  # Relationship with sensor data
+                    'timeStamp': sensor_data['timeStamp'],  # Relationship with sensor data
+                    'measurementID': measurementID,
                     'Value': measurementData.numericVal,
-                    'Decision': measurementData.decision,
-                    'FeatureName': (idToFeatureName(measurementID)),
-                    'TimeStamp': pd.to_datetime('now')
-                }]
+                    'Decision': str(measurementData.decision),
+                    'FeatureName': idToFeatureName(measurementID)
+                }
+                
+                measurement_data_list.append(measurement_data)
 
-                measurement_data = pd.concat([measurement_data, pd.DataFrame(measurement_data_dict)], ignore_index=True)
-                # print('measurement_data_batch:')
-                measurement_data_batch = pd.concat([measurement_data_batch, pd.DataFrame(measurement_data)], ignore_index=True)
-    if measurement_data.empty:
-        print("No valid measurement data found.")
+    # Convert lists to DataFrame
+    measurement_data_batch = pd.DataFrame(measurement_data_list)
+    
+    if measurement_data_batch.empty:
+        log_error("No valid measurement data found.")
         return None
     
-    export_csv(measurement_data_batch)
+    # Drop any empty or all-NA columns
+    measurement_data_batch = measurement_data_batch.dropna(axis=1, how='all')
+
+    # Export data in a separate thread
+    thread = threading.Thread(target=export_csv, args=(measurement_data_batch, config))
+    thread.daemon = True  # Set the thread as a daemon to stop when the main thread stops
+    thread.start()
+
+    # Export data
+    #csv_filename = export_csv(measurement_data_batch)
+    
+    #log_info("Measurement data exported to CSV file: {}".format(csv_filename))
+
+    # Destroy the dataset object
     kObject_Destroy(dataset)
+
     return measurement_data_batch
+
+
 class kIpAddress(Structure):
     _fields_ = [("kIpVersion", c_int32),("kByte",c_char*16)]
 
@@ -186,7 +234,7 @@ def run_measurement_data_collection():
     dataObj = GoDataMsg(kNULL)
     changed = kBool(kNULL)
 
-    print('Sdk Version is: ' + getVersionStr())
+    logging.info('Sdk Version is: ' + getVersionStr())
 
     GoSdk.GoSdk_Construct(byref(api))  # Build API
     GoSdk.GoSystem_Construct(byref(system), kNULL)  # Construct sensor system
@@ -196,18 +244,19 @@ def run_measurement_data_collection():
     array_sensor_IP = b'192.168.92.111'
     overhead_sensor_IP = b'192.168.92.107'
     ipAddr_ref = kIpAddress()
-    kApi.kIpAddress_Parse(byref(ipAddr_ref), sensor_IP)
+    kApi.kIpAddress_Parse(byref(ipAddr_ref), array_sensor_IP)
     GoSdk.GoSystem_FindSensorByIpAddress(system, byref(ipAddr_ref), byref(sensor))
     
     # Connect to sensor via ID
     array_sensor_ID = 172054
     overhead_sensor_ID = 181521
     GoSdk.GoSystem_FindSensorById(system, array_sensor_ID, byref(sensor))
+    
 
-    GoSdk.GoSensor_Connect(sensor)
+    #GoSdk.GoSensor_Start(sensor)  # Start the sensor to gather data
+    #GoSdk.GoSensor_Connect(sensor)
     GoSdk.GoSystem_EnableData(system, kTRUE)  # Enable the sensor's data channel to receive measurement data
-    # GoSdk.GoSensor_Start(sensor)  # Start the sensor to gather data
-    print("Connected!")
+    logging.info(" Sensor Connected!")
 
     # Initialize message handler manager
     Mgr = MsgManager(GoSdk, system, dataset)
@@ -216,8 +265,8 @@ def run_measurement_data_collection():
     Mgr.SetDataHandler(RECEIVE_TIMEOUT, receive_data)
 
     # Issue a stop then start in case the emulator is still running. For live sensors, only a start is needed.
-    GoSdk.GoSensor_Stop(sensor) 
-    GoSdk.GoSensor_Start(sensor)
+    #GoSdk.GoSensor_Stop(sensor) 
+    #GoSdk.GoSensor_Start(sensor)
     
     # Do nothing
     while input() != "exit":
@@ -229,7 +278,6 @@ def run_measurement_data_collection():
     # Destroy the system object and api
     kObject_Destroy(system)
     kObject_Destroy(api)
-
 
 if __name__ == "__main__":
 # Instantiate system objects
