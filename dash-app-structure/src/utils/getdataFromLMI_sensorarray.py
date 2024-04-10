@@ -238,7 +238,7 @@ class getDataFromLMICameras:
         
         return None
 
-    def idToFeatureName(featureId):
+    def idToFeatureName(self, featureId):
         featurename = {
         125: 'Tongue Upper Radius',
         121: 'Tongue Lower Radius',
