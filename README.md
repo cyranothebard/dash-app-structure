@@ -25,6 +25,7 @@ Additionally, I've created this repository to demonstrate the structure and serv
 Each file in the repository includes more information about the purpose of the file.
 
 ```bash
+
 |-- .venv
 |   |-- *
 dash-app-structure

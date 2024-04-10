@@ -1,6 +1,8 @@
 
+import datetime
 import os
 import threading
+import time
 import pandas as pd
 import msvcrt
 import uuid
@@ -55,6 +57,8 @@ kBool = ctypes.c_bool
 kCall = ctypes.c_bool
 kCount = ctypes.c_uint32
 
+measurement_data_list = []
+
 class GoStampData(Structure):
     _fields_ = [("frameIndex", c_uint64), ("timestamp",c_uint64), ("encoder", c_int64), ("encoderAtZ", c_int64), ("status", c_uint64), ("id", c_uint32)]
 
@@ -93,8 +97,12 @@ def export_csv(data, config):
     # Check if the directory exists for CSV data and create if not
     if not os.path.exists(data_directory_CSV):
         os.makedirs(data_directory_CSV)
+    # Get the current Unix timestamp
+    timestamp = time.time()
 
-    unique_filename = os.path.join(data_directory_CSV, str(uuid.uuid4()) + ".csv")
+    # Convert the Unix timestamp to a datetime object
+    datetime_obj = str(timestamp)
+    unique_filename = os.path.join(data_directory_CSV, str(uuid.uuid4()) + datetime_obj + ".csv")
     
     try:
         # Attempt to acquire an exclusive lock on the file
@@ -137,13 +145,89 @@ def idToFeatureName(featureId):
     }
     return featurename.get(featureId, 'Unknown')
 
+def receive_surface_data(dataset):
+    if not dataset:
+        log_error("Invalid dataset. Exiting function.")
+        return None
+    
+    sensor_data = None
+    global measurement_data_list
+    
+    for i in range(GoSdk.GoDataSet_Count(dataset)):
+        k_object_address = GoSdk.GoDataSet_At(dataset, i)
+        dataObj = GoDataMsg(k_object_address)
+        
+        if GoSdk.GoDataMsg_Type(dataObj) == GO_DATA_MESSAGE_TYPE_STAMP:
+            stampMsg = dataObj
+            msgCount = GoSdk.GoStampMsg_Count(stampMsg)
+            
+            for k in range(msgCount):
+                stampDataPtr = GoSdk.GoStampMsg_At(stampMsg, k)
+                stampData = stampDataPtr.contents
+
+                sensor_data = {
+                    'sensorID': stampData.id,
+                    'frameIndex': stampData.frameIndex,
+                    'timeStamp': stampData.timestamp
+                }
+
+        if GoSdk.GoDataMsg_Type(dataObj) == GO_DATA_MESSAGE_TYPE_UNIFORM_SURFACE:
+            # measurementMsg = dataObj
+            # msgCount = GoSdk.GoMeasurementMsg_Count(measurementMsg)
+
+            # for k in range(msgCount):
+            #     measurementDataPtr = GoSdk.GoMeasurementMsg_At(measurementMsg, k)
+            #     measurementData = measurementDataPtr.contents
+            #     measurementID = GoSdk.GoMeasurementMsg_Id(measurementMsg)
+
+            # #     if measurementData.numericVal != -1.7976931348623157e+308:
+            # #         measurement_data = {
+            # #             'sensorID': sensor_data['sensorID'],  # Relationship with sensor data
+            # #             'frameIndex': sensor_data['frameIndex'],  # Relationship with sensor data
+            # #             'timeStamp': sensor_data['timeStamp'],  # Relationship with sensor data
+            # #             'measurementID': measurementID,
+            # #             'Value': measurementData.numericVal,
+            # #             'Decision': str(measurementData.decision),
+            # #             'FeatureName': idToFeatureName(measurementID)
+            # #         }
+            # #         measurement_data_list.append(measurement_data)
+            # #     #log error
+            # #     if measurementData.numericVal == -1.7976931348623157e+308:
+            # #         log_error("value is invalid")
+
+            # Convert lists to DataFrame
+            measurement_data_batch = pd.DataFrame(measurement_data_list)
+
+            measurement_data_list = []
+            
+            if measurement_data_batch.empty:
+                log_error("No valid measurement data found.")
+                return None
+            
+            # Drop any empty or all-NA columns
+            measurement_data_batch = measurement_data_batch.dropna(axis=1, how='all')
+
+            #Export data in a separate thread
+            #thread = threading.Thread(target=export_csv, args=(measurement_data_batch, config))
+            #thread.daemon = True  # Set the thread as a daemon to stop when the main thread stops
+            #thread.start()
+            export_csv(measurement_data_batch, config)
+            
+            #log_info("Measurement data exported to CSV file: {}".format(csv_filename))
+
+            # Destroy the dataset object
+            kObject_Destroy(dataset)
+
+    return True
+    
+
 def receive_data(dataset):
     if not dataset:
         log_error("Invalid dataset. Exiting function.")
         return None
     
     sensor_data = None
-    measurement_data_list = []
+    global measurement_data_list
     
     for i in range(GoSdk.GoDataSet_Count(dataset)):
         k_object_address = GoSdk.GoDataSet_At(dataset, i)
@@ -172,42 +256,44 @@ def receive_data(dataset):
                 measurementData = measurementDataPtr.contents
                 measurementID = GoSdk.GoMeasurementMsg_Id(measurementMsg)
 
-                measurement_data = {
-                    'sensorID': sensor_data['sensorID'],  # Relationship with sensor data
-                    'frameIndex': sensor_data['frameIndex'],  # Relationship with sensor data
-                    'timeStamp': sensor_data['timeStamp'],  # Relationship with sensor data
-                    'measurementID': measurementID,
-                    'Value': measurementData.numericVal,
-                    'Decision': str(measurementData.decision),
-                    'FeatureName': idToFeatureName(measurementID)
-                }
-                
-                measurement_data_list.append(measurement_data)
+                if measurementData.numericVal != -1.7976931348623157e+308:
+                    measurement_data = {
+                        'sensorID': sensor_data['sensorID'],  # Relationship with sensor data
+                        'frameIndex': sensor_data['frameIndex'],  # Relationship with sensor data
+                        'timeStamp': sensor_data['timeStamp'],  # Relationship with sensor data
+                        'measurementID': measurementID,
+                        'Value': measurementData.numericVal,
+                        'Decision': str(measurementData.decision),
+                        'FeatureName': idToFeatureName(measurementID)
+                    }
+                    measurement_data_list.append(measurement_data)
+                #log error
+                if measurementData.numericVal == -1.7976931348623157e+308:
+                    log_error("value is invalid")
 
     # Convert lists to DataFrame
-    measurement_data_batch = pd.DataFrame(measurement_data_list)
+    # measurement_data_batch = pd.DataFrame(measurement_data_list)
     
-    if measurement_data_batch.empty:
-        log_error("No valid measurement data found.")
-        return None
+    # if measurement_data_batch.empty:
+    #     log_error("No valid measurement data found.")
+    #     return None
     
-    # Drop any empty or all-NA columns
-    measurement_data_batch = measurement_data_batch.dropna(axis=1, how='all')
+    # # Drop any empty or all-NA columns
+    # measurement_data_batch = measurement_data_batch.dropna(axis=1, how='all')
 
-    # Export data in a separate thread
-    thread = threading.Thread(target=export_csv, args=(measurement_data_batch, config))
-    thread.daemon = True  # Set the thread as a daemon to stop when the main thread stops
-    thread.start()
-
-    # Export data
-    #csv_filename = export_csv(measurement_data_batch)
+    # #Export data in a separate thread
+    # #thread = threading.Thread(target=export_csv, args=(measurement_data_batch, config))
+    # #thread.daemon = True  # Set the thread as a daemon to stop when the main thread stops
+    # #thread.start()
+    # export_csv(measurement_data_batch, config)
     
     #log_info("Measurement data exported to CSV file: {}".format(csv_filename))
 
     # Destroy the dataset object
     kObject_Destroy(dataset)
 
-    return measurement_data_batch
+    # return measurement_data_batch
+    return True
 
 
 class kIpAddress(Structure):
@@ -239,77 +325,23 @@ def run_measurement_data_collection():
     GoSdk.GoSdk_Construct(byref(api))  # Build API
     GoSdk.GoSystem_Construct(byref(system), kNULL)  # Construct sensor system
 
-    # Connect to the sensor
-    sensor_IP = b'127.0.0.1'  # default for local emulator is 127.0.0.1
-    array_sensor_IP = b'192.168.92.111'
-    overhead_sensor_IP = b'192.168.92.107'
-    ipAddr_ref = kIpAddress()
-    kApi.kIpAddress_Parse(byref(ipAddr_ref), array_sensor_IP)
-    GoSdk.GoSystem_FindSensorByIpAddress(system, byref(ipAddr_ref), byref(sensor))
-    
-    # Connect to sensor via ID
-    array_sensor_ID = 172054
-    overhead_sensor_ID = 181521
-    GoSdk.GoSystem_FindSensorById(system, array_sensor_ID, byref(sensor))
-    
-
-    #GoSdk.GoSensor_Start(sensor)  # Start the sensor to gather data
-    #GoSdk.GoSensor_Connect(sensor)
-    GoSdk.GoSystem_EnableData(system, kTRUE)  # Enable the sensor's data channel to receive measurement data
-    logging.info(" Sensor Connected!")
-
-    # Initialize message handler manager
-    Mgr = MsgManager(GoSdk, system, dataset)
-
-    # Set data handler which spawns a worker thread to receive input data
-    Mgr.SetDataHandler(RECEIVE_TIMEOUT, receive_data)
-
-    # Issue a stop then start in case the emulator is still running. For live sensors, only a start is needed.
-    #GoSdk.GoSensor_Stop(sensor) 
-    #GoSdk.GoSensor_Start(sensor)
-    
-    # Do nothing
-    while input() != "exit":
-        pass
-    
-    # Can close thread manually by recalling data handler with kNull passed
-    # Mgr.SetDataHandler(GoSdk, system, dataset, RECEIVE_TIMEOUT, kNULL)
-
-    # Destroy the system object and api
-    kObject_Destroy(system)
-    kObject_Destroy(api)
-
-if __name__ == "__main__":
-# Instantiate system objects
-    api = kAssembly(kNULL)
-    system = GoSystem(kNULL)
-    sensor = GoSensor(kNULL)
-    dataset = GoDataSet(kNULL)
-    dataObj = GoDataMsg(kNULL)
-    changed = kBool(kNULL)
-
-    print('Sdk Version is: ' + getVersionStr())
-
-    GoSdk.GoSdk_Construct(byref(api))  # Build API
-    GoSdk.GoSystem_Construct(byref(system), kNULL)  # Construct sensor system
-
     #connect to sensor via IP
     sensor_IP = b'127.0.0.1' #default for local emulator is 127.0.0.1 
     array_sensor_IP = b'192.168.92.111'
     overhead_sensor_IP = b'192.168.92.107'
     ipAddr_ref = kIpAddress()
-    kApi.kIpAddress_Parse(byref(ipAddr_ref), sensor_IP)
+    kApi.kIpAddress_Parse(byref(ipAddr_ref), array_sensor_IP)
     GoSdk.GoSystem_FindSensorByIpAddress(system,byref(ipAddr_ref),byref(sensor))
     
     #connect to sensor via ID
-    array_sensor_ID = 172054
-    overhead_sensor_ID = 181521
-    GoSdk.GoSystem_FindSensorById(system, array_sensor_ID, byref(sensor))
+    #array_sensor_ID = 172054
+    #overhead_sensor_ID = 181521
+    #GoSdk.GoSystem_FindSensorById(system, array_sensor_ID, byref(sensor))
 
     GoSdk.GoSensor_Connect(sensor)  # Connect to the sensor
     GoSdk.GoSystem_EnableData(system, kTRUE)  # Enable the sensor's data channel to receive measurement data
     #GoSdk.GoSensor_Start(sensor)  # Start the sensor to gather data
-    print("connected!")
+    print("Array Cameras Connected!")
 
     #Initialize message handler manager
     Mgr = MsgManager(GoSdk, system, dataset)
@@ -318,7 +350,7 @@ if __name__ == "__main__":
     Mgr.SetDataHandler(RECEIVE_TIMEOUT, receive_data)
 
     #Issue a stop then start incase the emulator is still running. For live sensors, only a start is needed.
-    GoSdk.GoSensor_Stop(sensor) 
+    #GoSdk.GoSensor_Stop(sensor) 
     GoSdk.GoSensor_Start(sensor)
     
     #Do nothing
@@ -331,3 +363,59 @@ if __name__ == "__main__":
     ### Destroy the system object and api
     kObject_Destroy(system)
     kObject_Destroy(api)
+
+def run_surface_data_collection():
+    # Instantiate system objects
+    api = kAssembly(kNULL)
+    system = GoSystem(kNULL)
+    sensor = GoSensor(kNULL)
+    dataset = GoDataSet(kNULL)
+    dataObj = GoDataMsg(kNULL)
+    changed = kBool(kNULL)
+
+    logging.info('Sdk Version is: ' + getVersionStr())
+
+    GoSdk.GoSdk_Construct(byref(api))  # Build API
+    GoSdk.GoSystem_Construct(byref(system), kNULL)  # Construct sensor system
+
+    #connect to sensor via IP
+    sensor_IP = b'127.0.0.1' #default for local emulator is 127.0.0.1 
+    # array_sensor_IP = b'192.168.92.111'
+    overhead_sensor_IP = b'192.168.92.107'
+    ipAddr_ref = kIpAddress()
+    kApi.kIpAddress_Parse(byref(ipAddr_ref), overhead_sensor_IP)
+    GoSdk.GoSystem_FindSensorByIpAddress(system,byref(ipAddr_ref),byref(sensor))
+    
+    #connect to sensor via ID
+    #array_sensor_ID = 172054
+    #overhead_sensor_ID = 181521
+    #GoSdk.GoSystem_FindSensorById(system, array_sensor_ID, byref(sensor))
+
+    GoSdk.GoSensor_Connect(sensor)  # Connect to the sensor
+    GoSdk.GoSystem_EnableData(system, kTRUE)  # Enable the sensor's data channel to receive measurement data
+    #GoSdk.GoSensor_Start(sensor)  # Start the sensor to gather data
+    print("Surface Camera Connected!")
+
+    #Initialize message handler manager
+    Mgr = MsgManager(GoSdk, system, dataset)
+
+    #Set data handler which spawns a worker thread to recieve input data
+    Mgr.SetDataHandler(RECEIVE_TIMEOUT, receive_surface_data)
+
+    #Issue a stop then start incase the emulator is still running. For live sensors, only a start is needed.
+    #GoSdk.GoSensor_Stop(sensor) 
+    GoSdk.GoSensor_Start(sensor)
+    
+    #Do nothing
+    while(input() != "exit"):
+        pass
+    
+    #Can close thread manually by recalling data handler with kNull passed
+    #Mgr.SetDataHandler(GoSdk, system, dataset, RECEIVE_TIMEOUT, kNULL)
+
+    ### Destroy the system object and api
+    kObject_Destroy(system)
+    kObject_Destroy(api)
+
+# if __name__ == "__main__":
+#     run_measurement_data_collection()
