@@ -11,7 +11,7 @@ from flask_login import LoginManager
 from components.login import User, login_location
 from components import navbar, footer
 from utils.settings import APP_DEBUG, DEV_TOOLS_PROPS_CHECK
-from utils.getdataFromLMI_sensorarray import run_measurement_data_collection, run_surface_data_collection
+from utils.getdataFromLMI_sensorarray import getDataFromLMICameras
 from utils.configureLogging import configure_logging
 import time
 
@@ -67,8 +67,9 @@ def main_thread():
 def data_collection_thread():
     """Start data collection in a separate thread."""
     logging.info("Starting data collection...")
-    thread = threading.Thread(target=run_measurement_data_collection)
-    surface_thread = threading.Thread(target=run_surface_data_collection)
+    lmiCameras = getDataFromLMICameras()
+    thread = threading.Thread(target=lmiCameras.run_measurement_data_collection)
+    surface_thread = threading.Thread(target=lmiCameras.run_surface_data_collection)
     thread.start()
     time.sleep(2)
     surface_thread.start()
