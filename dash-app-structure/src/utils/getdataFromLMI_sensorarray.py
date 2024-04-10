@@ -172,32 +172,11 @@ def receive_surface_data(dataset):
                 }
 
         if GoSdk.GoDataMsg_Type(dataObj) == GO_DATA_MESSAGE_TYPE_UNIFORM_SURFACE:
-            # measurementMsg = dataObj
-            # msgCount = GoSdk.GoMeasurementMsg_Count(measurementMsg)
-
-            # for k in range(msgCount):
-            #     measurementDataPtr = GoSdk.GoMeasurementMsg_At(measurementMsg, k)
-            #     measurementData = measurementDataPtr.contents
-            #     measurementID = GoSdk.GoMeasurementMsg_Id(measurementMsg)
-
-            # #     if measurementData.numericVal != -1.7976931348623157e+308:
-            # #         measurement_data = {
-            # #             'sensorID': sensor_data['sensorID'],  # Relationship with sensor data
-            # #             'frameIndex': sensor_data['frameIndex'],  # Relationship with sensor data
-            # #             'timeStamp': sensor_data['timeStamp'],  # Relationship with sensor data
-            # #             'measurementID': measurementID,
-            # #             'Value': measurementData.numericVal,
-            # #             'Decision': str(measurementData.decision),
-            # #             'FeatureName': idToFeatureName(measurementID)
-            # #         }
-            # #         measurement_data_list.append(measurement_data)
-            # #     #log error
-            # #     if measurementData.numericVal == -1.7976931348623157e+308:
-            # #         log_error("value is invalid")
 
             # Convert lists to DataFrame
             measurement_data_batch = pd.DataFrame(measurement_data_list)
 
+            # Reset the global variable list
             measurement_data_list = []
             
             if measurement_data_batch.empty:
@@ -270,22 +249,6 @@ def receive_data(dataset):
                 #log error
                 if measurementData.numericVal == -1.7976931348623157e+308:
                     log_error("value is invalid")
-
-    # Convert lists to DataFrame
-    # measurement_data_batch = pd.DataFrame(measurement_data_list)
-    
-    # if measurement_data_batch.empty:
-    #     log_error("No valid measurement data found.")
-    #     return None
-    
-    # # Drop any empty or all-NA columns
-    # measurement_data_batch = measurement_data_batch.dropna(axis=1, how='all')
-
-    # #Export data in a separate thread
-    # #thread = threading.Thread(target=export_csv, args=(measurement_data_batch, config))
-    # #thread.daemon = True  # Set the thread as a daemon to stop when the main thread stops
-    # #thread.start()
-    # export_csv(measurement_data_batch, config)
     
     #log_info("Measurement data exported to CSV file: {}".format(csv_filename))
 
@@ -416,6 +379,3 @@ def run_surface_data_collection():
     ### Destroy the system object and api
     kObject_Destroy(system)
     kObject_Destroy(api)
-
-# if __name__ == "__main__":
-#     run_measurement_data_collection()
