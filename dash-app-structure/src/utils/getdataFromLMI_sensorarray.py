@@ -17,6 +17,7 @@ from array import array
 from PIL import Image, ImageDraw
 import random
 import string
+from pyModbusTCP.client import ModbusClient
 
 from utils.GoSdk_MsgHandler import MsgManager
 from utils.loadConfig import load_config
@@ -24,6 +25,9 @@ from utils.loadConfig import load_config
 cwd = os.getcwd()
 config_file_path = os.path.join(cwd, 'dash-app-structure', 'config.json')
 config = load_config(config_file_path)
+
+ALLOW_R_L = ['127.0.0.1', '192.168.92.104']
+ALLOW_W_L = ['127.0.0.1']
 
 ### Load Api
 #gosdkInstallPath = config.get('gosdkInstallPath')
@@ -77,7 +81,7 @@ class getDataFromLMICameras:
         self.config_file_path = os.path.join(cwd, 'dash-app-structure', 'config.json')
         self.config = load_config(config_file_path)
         self.door_ID = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
-
+        self.modbusClient= ModbusClient(host="192.168.92.104", port=502, auto_open=True)
         
     def receive_surface_data(self, dataset):
         if not dataset:
@@ -143,7 +147,7 @@ class getDataFromLMICameras:
                                                                   value_count=('Value', 'count'),
                                                                   standard_deviation=('Value', 'std'),
                                                                   variance=('Value', 'var'))
-
+        self.trigger_stacklight(grouped_data)
         # Reset the global variable list
         self.measurement_data_list = []
         
@@ -318,7 +322,6 @@ class getDataFromLMICameras:
         }
         return featurename.get(featureId, 'Unknown')
     
-    
     def run_measurement_data_collection(self):
         # Instantiate system objects
         api = kAssembly(kNULL)
@@ -334,17 +337,17 @@ class getDataFromLMICameras:
         GoSdk.GoSystem_Construct(byref(system), kNULL)  # Construct sensor system
 
         #connect to sensor via IP
-        sensor_IP = b'127.0.0.1' #default for local emulator is 127.0.0.1 
-        array_sensor_IP = b'192.168.92.111'
-        overhead_sensor_IP = b'192.168.92.107'
-        ipAddr_ref = kIpAddress()
-        kApi.kIpAddress_Parse(byref(ipAddr_ref), array_sensor_IP)
-        GoSdk.GoSystem_FindSensorByIpAddress(system,byref(ipAddr_ref),byref(sensor))
+        # sensor_IP = b'127.0.0.1' #default for local emulator is 127.0.0.1 
+        # array_sensor_IP = b'192.168.92.101'
+        # overhead_sensor_IP = b'192.168.92.107'
+        # ipAddr_ref = kIpAddress()
+        # kApi.kIpAddress_Parse(byref(ipAddr_ref), array_sensor_IP)
+        # GoSdk.GoSystem_FindSensorByIpAddress(system,byref(ipAddr_ref),byref(sensor))
         
-        #connect to sensor via ID
-        #array_sensor_ID = 172054
-        #overhead_sensor_ID = 181521
-        #GoSdk.GoSystem_FindSensorById(system, array_sensor_ID, byref(sensor))
+        # connect to sensor via ID
+        array_sensor_ID = 172054
+        overhead_sensor_ID = 181521
+        GoSdk.GoSystem_FindSensorById(system, array_sensor_ID, byref(sensor))
 
         GoSdk.GoSensor_Connect(sensor)  # Connect to the sensor
         GoSdk.GoSystem_EnableData(system, kTRUE)  # Enable the sensor's data channel to receive measurement data
@@ -387,17 +390,17 @@ class getDataFromLMICameras:
         GoSdk.GoSystem_Construct(byref(system), kNULL)  # Construct sensor system
 
         #connect to sensor via IP
-        sensor_IP = b'127.0.0.1' #default for local emulator is 127.0.0.1 
-        # array_sensor_IP = b'192.168.92.111'
-        overhead_sensor_IP = b'192.168.92.107'
-        ipAddr_ref = kIpAddress()
-        kApi.kIpAddress_Parse(byref(ipAddr_ref), overhead_sensor_IP)
-        GoSdk.GoSystem_FindSensorByIpAddress(system,byref(ipAddr_ref),byref(sensor))
+        # sensor_IP = b'127.0.0.1' #default for local emulator is 127.0.0.1 
+        # # array_sensor_IP = b'192.168.92.111'
+        # overhead_sensor_IP = b'192.168.92.107'
+        # ipAddr_ref = kIpAddress()
+        # kApi.kIpAddress_Parse(byref(ipAddr_ref), overhead_sensor_IP)
+        # GoSdk.GoSystem_FindSensorByIpAddress(system,byref(ipAddr_ref),byref(sensor))
         
-        #connect to sensor via ID
-        #array_sensor_ID = 172054
-        #overhead_sensor_ID = 181521
-        #GoSdk.GoSystem_FindSensorById(system, array_sensor_ID, byref(sensor))
+        # connect to sensor via ID
+        array_sensor_ID = 172054
+        overhead_sensor_ID = 181521
+        GoSdk.GoSystem_FindSensorById(system, overhead_sensor_ID, byref(sensor))
 
         GoSdk.GoSensor_Connect(sensor)  # Connect to the sensor
         GoSdk.GoSystem_EnableData(system, kTRUE)  # Enable the sensor's data channel to receive measurement data
@@ -425,6 +428,47 @@ class getDataFromLMICameras:
         # self.kObject_Destroy(system)
         # self.kObject_Destroy(api)
 
+    def trigger_stacklight(self, grouped_data):
+    # Initialize the Modbus client (TCP always open)
+        if (self.modbusClient.open()) != True:
+            self.modbusClient= ModbusClient(host="192.168.92.104", port=502, auto_open=True)
+        else: 
+            pass
+        
+        # c.connect()
+    # set empty counts
+        count_green = 0
+        count_amber = 0
+        count_red = 0
+    # set coil hex addresses
+        coil_red = 0x01E8
+        coil_amber = 0x01E9
+        coil_green = 0x01EA
+    
+    # aggregate percent_pass data
+        for i in range(len(grouped_data)):
+            if grouped_data['percent_pass'][i] >= 0.75:
+                count_green +=1
+            elif grouped_data['percent_pass'][i] >= 0.50 and grouped_data['percent_pass'][i] < 0.75:
+                count_amber +=1
+            elif grouped_data['percent_pass'][i] < 0.50:
+                count_red +=1
+        # Read 16-bit registers at Modbus address 0
+        if count_green > (count_amber + count_red):
+            self.modbusClient.write_single_coil(coil_green, True)
+            time.sleep(5)
+            print('Inspection Passed')
+            self.modbusClient.write_single_coil(coil_green, False)
+        elif count_green <= (count_amber + count_red):
+            self.modbusClient.write_single_coil(coil_amber,True)
+            time.sleep(5)
+            print('Inspection Marginal')
+            self.modbusClient.write_single_coil(coil_amber, False)
+        elif count_red > (count_amber + count_green):
+            self.modbusClient.write_single_coil(coil_red, True)
+            time.sleep(5)
+            print('Inspection Failed')
+            self.modbusClient.write_single_coil(coil_red, False)
 
 class kIpAddress(Structure):
     _fields_ = [("kIpVersion", c_int32),("kByte",c_char*16)]

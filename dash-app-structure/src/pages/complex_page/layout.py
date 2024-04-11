@@ -139,7 +139,7 @@ columns_DT = [
 
 # Create empty DataTables
 
-empty_df = pd.DataFrame(columns=['timeStamp', 'doorID', 'measurementID', 'FeatureName', 'percent_pass', 'average_value', 'standard_deviation', 'variance'])
+empty_df = pd.DataFrame(columns=['timeStamp', 'doorID', 'measurementID', 'FeatureName', 'percent_pass', 'average_value', 'min_value', 'max_value', 'value_count', 'standard_deviation', 'variance'])
 
 highlight_conditional = [
     {
@@ -172,16 +172,30 @@ layout = html.Div([
         create_profile_image_card('70E100', 'right')
     ]),
     html.H3('Measurement Data'),
-    dash_table.DataTable(data = empty_df.to_dict('records'), columns = columns_DT, id='tbl', page_size=20, sort_action='native'
-    #                      style_data_conditional=[
-    #     {
-    #         'if': {
-    #             'filter_query': '{{Percent Pass}} = {}'.format(empty_df['percent_pass'].min()),
-    #         },
-    #         'backgroundColor': '#FF4136',
-    #         'color': 'white'
-    #     },
-    # ]
+    dash_table.DataTable(data = empty_df.to_dict('records'), columns = columns_DT, id='tbl', page_size=20, sort_action='native',
+                         style_data_conditional=[
+        {
+            'if': {
+                'filter_query': '{percent_pass} >= "0.5" && {percent_pass} <= "0.75"'
+            },
+            'backgroundColor': '#FFBF00',
+            'color': 'white'
+        },
+        {
+            'if': {
+                'filter_query': '{percent_pass} < "0.5"'
+            },
+            'backgroundColor': '#Ff0000',
+            'color': 'white'
+        },
+        {
+            'if': {
+                'filter_query': '{percent_pass} > "0.75"'
+            },
+            'backgroundColor': '#028A0F',
+            'color': 'white'
+        },
+    ]
     ),
     # html.H3('Order data'),
     # dbc.Row([

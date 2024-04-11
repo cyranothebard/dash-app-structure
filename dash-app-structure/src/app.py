@@ -70,7 +70,7 @@ def data_collection_thread(lmiCameras):
     thread = threading.Thread(target=lmiCameras.run_measurement_data_collection)
     surface_thread = threading.Thread(target=lmiCameras.run_surface_data_collection)
     thread.start()
-    time.sleep(2)
+    time.sleep(4)
     surface_thread.start()
 
 # Run the app locally for development
