@@ -50,8 +50,9 @@ app.layout = lambda: html.Div(
         dbc.Container(
             dash.page_container,
             class_name='my-2'
-        ),
-        footer
+        )
+        # ),
+        # footer
     ]
 )
 
@@ -62,7 +63,8 @@ def main_thread():
     """Start the Flask app."""
     configure_logging()  # Configure logging
     logging.info("Starting the Flask app...")
-    server.run(host=os.getenv('HOST'), port=os.getenv('PORT'), debug=os.getenv('APP_DEBUG'))
+    # server.run(host=os.getenv('0.0.0.0'), port=os.getenv('8050'), debug=os.getenv('APP_DEBUG'))
+    server.run(host='0.0.0.0', port='5000', debug=os.getenv('APP_DEBUG'))
 
 def data_collection_thread(lmiCameras):
     """Start data collection in a separate thread."""

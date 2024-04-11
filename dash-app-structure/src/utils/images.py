@@ -14,7 +14,10 @@ image_cdn = 'https://images.dog.ceo/breeds'
 # logo information
 cwd = os.getcwd()
 logo_path = os.path.join(cwd,'dash-app-structure', 'src', 'assets', 'logos', 'amarr_logo_main.jpg')
+denali_logo_path = os.path.join(cwd,'dash-app-structure', 'src', 'assets', 'logos', 'denali_logo.jpg')
 logo_tunel = base64.b64encode(open(logo_path, 'rb').read())
+denali_logo_tunel = base64.b64encode(open(denali_logo_path, 'rb').read())
+denali_logo_encoded = f'data:image/png;base64,{denali_logo_tunel.decode()}'
 logo_encoded = f'data:image/png;base64,{logo_tunel.decode()}'
 
 def get_side_profile(productid, side):

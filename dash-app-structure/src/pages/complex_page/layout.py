@@ -90,7 +90,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Register the page with Dash
 dash.register_page(
     __name__,
-    path='/complex',
+    # path='/complex',
+    path = '/',
     title='Process Monitoring'
 )
 

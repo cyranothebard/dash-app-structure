@@ -2,12 +2,12 @@
 import dash
 from dash import html, dcc, callback, Input, Output
 
-dash.register_page(
-    __name__,
-    path='/',
-    redirect_from=['/home'],
-    title='Admin'
-)
+# dash.register_page(
+#     __name__,
+#     path='/',
+#     redirect_from=['/home'],
+#     title='Admin'
+# )
 
 layout = html.Div(
     [
