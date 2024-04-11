@@ -8,8 +8,9 @@ import logging
 import threading  # Import threading module for multi-threading
 from components import create_profile_image_card
 from utils.loadConfig import load_config
+from dash.dash_table import FormatTemplate
+from dash.dash_table.Format import Format, Scheme, Trim 
 
-import os
 import shutil
 import time
 import pandas as pd
@@ -120,15 +121,35 @@ df_orderdata = dash_table.DataTable(
     columns=[{'name': col, 'id': col} for col in order_data.columns]
 )
 
-# Define columns for DataTable
-columns = [{'name': col, 'id': col} for col in
-           ['doorID', 'measurementID', 'FeatureName', 'percent_pass', 'average_value', 'standard_deviation', 'variance']]
+percentage = FormatTemplate.percentage(2)
+
+columns_DT = [
+    dict(id='timeStamp', name='Time Stamp'),
+    dict(id='doorID', name='Door ID', type='numeric', format=Format()),
+    dict(id='measurementID', name='Measurement ID', type='numeric', format=Format()),
+    dict(id='FeatureName', name='Feature Name'),
+    dict(id='percent_pass', name='Percent Pass', type='numeric', format=percentage),
+    dict(id='average_value', name='Average Value', type='numeric', format=Format(precision=2, scheme=Scheme.fixed)),
+    dict(id='min_value', name='Value Min', type='numeric', format=Format(precision=2, scheme=Scheme.fixed)),
+    dict(id='max_value', name='Value Max', type='numeric', format=Format(precision=2, scheme=Scheme.fixed)),
+    dict(id='value_count', name='Count'),
+    dict(id='standard_deviation', name='Standard Deviation', type='numeric', format=Format(precision=2, scheme=Scheme.fixed)),
+    dict(id='variance', name='Variance', type='numeric', format=Format(precision=2, scheme=Scheme.fixed)),
+]
 
 # Create empty DataTables
 
-empty_df = pd.DataFrame(columns=['doorID', 'measurementID', 'FeatureName', 'percent_pass', 'average_value', 'standard_deviation', 'variance'])
+empty_df = pd.DataFrame(columns=['timeStamp', 'doorID', 'measurementID', 'FeatureName', 'percent_pass', 'average_value', 'standard_deviation', 'variance'])
 
-
+highlight_conditional = [
+    {
+        'if': {
+            'filter_query': '{{Percent Pass}} = {}'.format(empty_df['percent_pass'] <= 0.8),
+        },
+        'backgroundColor': '#FF4136',
+        'color': 'white'
+    },
+]
 # Define input and archived directories for CSV data
 #input_dir_path_CSV = config.get('data_directory_CSV')
 input_dir_path_CSV = config.get('grouped_data_directory_CSV')
@@ -151,7 +172,17 @@ layout = html.Div([
         create_profile_image_card('70E100', 'right')
     ]),
     html.H3('Measurement Data'),
-    dash_table.DataTable(empty_df.to_dict('records'),[{"name": i, "id": i} for i in empty_df.columns], id='tbl'),
+    dash_table.DataTable(data = empty_df.to_dict('records'), columns = columns_DT, id='tbl', page_size=20, sort_action='native'
+    #                      style_data_conditional=[
+    #     {
+    #         'if': {
+    #             'filter_query': '{{Percent Pass}} = {}'.format(empty_df['percent_pass'].min()),
+    #         },
+    #         'backgroundColor': '#FF4136',
+    #         'color': 'white'
+    #     },
+    # ]
+    ),
     # html.H3('Order data'),
     # dbc.Row([
     #     html.Div([df_orderdata])

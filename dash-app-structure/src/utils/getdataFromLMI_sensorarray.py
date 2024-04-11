@@ -134,8 +134,13 @@ class getDataFromLMICameras:
 
         # Convert lists to DataFrame
         measurement_data_batch = pd.DataFrame(self.measurement_data_list)
-        grouped_data = measurement_data_batch.groupby(['doorID', 'measurementID', 'FeatureName']).agg(percent_pass=('Decision', 'mean'),
+        measurement_data_batch['timeStamp'] = pd.Timestamp.now()
+        grouped_data = measurement_data_batch.groupby(['timeStamp','doorID', 'measurementID', 'FeatureName']).agg(
+                                                                  percent_pass=('Decision', 'mean'),
                                                                   average_value=('Value', 'mean'),
+                                                                  min_value=('Value', 'min'),
+                                                                  max_value=('Value', 'max'),
+                                                                  value_count=('Value', 'count'),
                                                                   standard_deviation=('Value', 'std'),
                                                                   variance=('Value', 'var'))
 
