@@ -64,10 +64,9 @@ def main_thread():
     logging.info("Starting the Flask app...")
     server.run(host=os.getenv('HOST'), port=os.getenv('PORT'), debug=os.getenv('APP_DEBUG'))
 
-def data_collection_thread():
+def data_collection_thread(lmiCameras):
     """Start data collection in a separate thread."""
     logging.info("Starting data collection...")
-    lmiCameras = getDataFromLMICameras()
     thread = threading.Thread(target=lmiCameras.run_measurement_data_collection)
     surface_thread = threading.Thread(target=lmiCameras.run_surface_data_collection)
     thread.start()
@@ -76,5 +75,8 @@ def data_collection_thread():
 
 # Run the app locally for development
 if __name__ == "__main__":
-    data_collection_thread()
+    lmiCameras = getDataFromLMICameras()
+    data_collection_thread(lmiCameras)
     main_thread()
+    #Do nothing
+

@@ -15,6 +15,8 @@ import boto3
 from ctypes import Structure, POINTER, byref, c_byte, c_char, c_int16, c_short, c_uint32, c_uint64, c_uint8, c_int32, c_int64, c_void_p, c_bool, c_double, c_ulonglong
 from array import array
 from PIL import Image, ImageDraw
+import random
+import string
 
 from utils.GoSdk_MsgHandler import MsgManager
 from utils.loadConfig import load_config
@@ -74,6 +76,7 @@ class getDataFromLMICameras:
         self.cwd = os.getcwd()
         self.config_file_path = os.path.join(cwd, 'dash-app-structure', 'config.json')
         self.config = load_config(config_file_path)
+        self.door_ID = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
 
         
     def receive_surface_data(self, dataset):
@@ -100,32 +103,71 @@ class getDataFromLMICameras:
                         'frameIndex': stampData.frameIndex,
                         'timeStamp': stampData.timestamp
                     }
+            
+            if GoSdk.GoDataMsg_Type(dataObj) == GO_DATA_MESSAGE_TYPE_MEASUREMENT:
+                measurementMsg = dataObj
+                msgCount = GoSdk.GoMeasurementMsg_Count(measurementMsg)
+
+                for k in range(msgCount):
+                    measurementDataPtr = GoSdk.GoMeasurementMsg_At(measurementMsg, k)
+                    measurementData = measurementDataPtr.contents
+                    measurementID = GoSdk.GoMeasurementMsg_Id(measurementMsg)
+
+                    if measurementData.numericVal != -1.7976931348623157e+308:
+                        measurement_data = {
+                            'doorID': self.door_ID,
+                            'sensorID': sensor_data['sensorID'],  # Relationship with sensor data
+                            'frameIndex': sensor_data['frameIndex'],  # Relationship with sensor data
+                            'timeStamp': sensor_data['timeStamp'],  # Relationship with sensor data
+                            'measurementID': measurementID,
+                            'Value': measurementData.numericVal,
+                            'Decision': measurementData.decision,
+                            'FeatureName': self.idToFeatureName(measurementID)
+                        }
+                        self.measurement_data_list.append(measurement_data)
+                    #log error
+                    if measurementData.numericVal == -1.7976931348623157e+308:
+                        self.log_error("value is invalid")
 
             if GoSdk.GoDataMsg_Type(dataObj) == GO_DATA_MESSAGE_TYPE_UNIFORM_SURFACE:
+                pass
 
-                # Convert lists to DataFrame
-                measurement_data_batch = pd.DataFrame(self.measurement_data_list)
+        # Convert lists to DataFrame
+        measurement_data_batch = pd.DataFrame(self.measurement_data_list)
+        grouped_data = measurement_data_batch.groupby(['doorID', 'measurementID', 'FeatureName']).agg(percent_pass=('Decision', 'mean'),
+                                                                  average_value=('Value', 'mean'),
+                                                                  standard_deviation=('Value', 'std'),
+                                                                  variance=('Value', 'var'))
 
-                # Reset the global variable list
-                self.measurement_data_list = []
+        # Reset the global variable list
+        self.measurement_data_list = []
+        
+        if measurement_data_batch.empty or grouped_data.empty:
+            self.log_error("No valid measurement data found.")
+            return None
+        
+        # Drop any empty or all-NA columns
+        measurement_data_batch = measurement_data_batch.dropna(axis=1, how='all')
+        grouped_data = grouped_data.dropna(axis=1, how='all')
+
+        
+        profile_data_directory_CSV = self.config.get('data_directory_CSV')
+        grouped_data_directory_CSV = self.config.get('grouped_data_directory_CSV')
+
+        #Export data in a separate thread
+        #thread = threading.Thread(target=export_csv, args=(measurement_data_batch, config))
+        #thread.daemon = True  # Set the thread as a daemon to stop when the main thread stops
+        #thread.start()
+        self.export_csv(measurement_data_batch, profile_data_directory_CSV, is_index=False)
+        self.export_csv(grouped_data, grouped_data_directory_CSV, is_index=True)
+
+        # Assigning a new door ID
+        self.door_ID = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
                 
-                if measurement_data_batch.empty:
-                    self.log_error("No valid measurement data found.")
-                    return None
-                
-                # Drop any empty or all-NA columns
-                measurement_data_batch = measurement_data_batch.dropna(axis=1, how='all')
+        #log_info("Measurement data exported to CSV file: {}".format(csv_filename))
 
-                #Export data in a separate thread
-                #thread = threading.Thread(target=export_csv, args=(measurement_data_batch, config))
-                #thread.daemon = True  # Set the thread as a daemon to stop when the main thread stops
-                #thread.start()
-                self.export_csv(measurement_data_batch)
-                
-                #log_info("Measurement data exported to CSV file: {}".format(csv_filename))
-
-                # Destroy the dataset object
-                self.kObject_Destroy(dataset)
+        # Destroy the dataset object
+        self.kObject_Destroy(dataset)
 
         return True
         
@@ -165,12 +207,13 @@ class getDataFromLMICameras:
 
                     if measurementData.numericVal != -1.7976931348623157e+308:
                         measurement_data = {
+                            'doorID': self.door_ID,
                             'sensorID': sensor_data['sensorID'],  # Relationship with sensor data
                             'frameIndex': sensor_data['frameIndex'],  # Relationship with sensor data
                             'timeStamp': sensor_data['timeStamp'],  # Relationship with sensor data
                             'measurementID': measurementID,
                             'Value': measurementData.numericVal,
-                            'Decision': str(measurementData.decision),
+                            'Decision': measurementData.decision,
                             'FeatureName': self.idToFeatureName(measurementID)
                         }
                         self.measurement_data_list.append(measurement_data)
@@ -202,7 +245,7 @@ class getDataFromLMICameras:
         if object != kNULL:
             kApi.xkObject_DestroyImpl(object, kFALSE)
 
-    def export_csv(self, data):
+    def export_csv(self, data, data_directory_CSV, is_index):
         """
         Export DataFrame to a CSV file.
 
@@ -213,7 +256,6 @@ class getDataFromLMICameras:
         Returns:
             str: Filename of the exported CSV file.
         """
-        data_directory_CSV = self.config.get('data_directory_CSV')
         # Check if the directory exists for CSV data and create if not
         if not os.path.exists(data_directory_CSV):
             os.makedirs(data_directory_CSV)
@@ -222,12 +264,13 @@ class getDataFromLMICameras:
 
         # Convert the Unix timestamp to a datetime object
         datetime_obj = str(timestamp)
-        unique_filename = os.path.join(data_directory_CSV, str(uuid.uuid4()) + datetime_obj + ".csv")
-        
+        # unique_filename = os.path.join(data_directory_CSV, str(uuid.uuid4()) + datetime_obj + ".csv")
+        unique_filename = os.path.join(data_directory_CSV, str(self.door_ID) + '_' + datetime_obj + '.csv')
+
         try:
             # Attempt to acquire an exclusive lock on the file
             file = open(unique_filename, 'w')
-            data.to_csv(file, index=False)
+            data.to_csv(file, index=is_index)
             file.close()
             return unique_filename
         except IOError as e:
@@ -241,6 +284,7 @@ class getDataFromLMICameras:
     def idToFeatureName(self, featureId):
         featurename = {
         125: 'Tongue Upper Radius',
+        123: 'Tongue Middle Radius',
         121: 'Tongue Lower Radius',
         116: 'Tongue Hem Height',
         96: 'Groove Seat Distance, Outer',
@@ -262,6 +306,10 @@ class getDataFromLMICameras:
         38: 'Tongue Lower Leg Height',
         32: 'Tongue Middle Leg Height',
         14: 'Tongue Leg Height',
+        15: 'Door Length',
+        26: 'Oil Canning - top',
+        27: 'Oil Canning - middle',
+        29: 'Oil Canning - bottom'
         }
         return featurename.get(featureId, 'Unknown')
     
@@ -369,8 +417,8 @@ class getDataFromLMICameras:
         #Mgr.SetDataHandler(GoSdk, system, dataset, RECEIVE_TIMEOUT, kNULL)
 
         ### Destroy the system object and api
-        self.kObject_Destroy(system)
-        self.kObject_Destroy(api)
+        # self.kObject_Destroy(system)
+        # self.kObject_Destroy(api)
 
 
 class kIpAddress(Structure):
